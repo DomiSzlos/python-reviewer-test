@@ -10,8 +10,12 @@ def sync_ddb_table(source_ddb, destination_ddb):
     response = source_ddb.scan(
         TableName="<FMI1>"
     )
+    data = response['Items']
+    while 'LastEvaluatedKey' in response:
+        response = source_ddb.scan(ExclusiveStartKey=response['LastEvaluatedKey'])
+        data.extend(response['Items'])
 
-    for item in response['Items']:
+    for item in data['Items']:
         destination_ddb.put_item(
             TableName="<FMI2>",
             Item=item
